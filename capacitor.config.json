@@ -1,0 +1,9 @@
+{
+  "appId": "com.wordplay.kelime",
+  "appName": "WordPlay",
+  "webDir": "www",
+  "backgroundColor": "#1b1340",
+  "android": {
+    "adjustMarginsForEdgeToEdge": "auto"
+  }
+}

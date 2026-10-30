@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#1b1340">
+<title>WordPlay</title>
+<style>
+:root{--bg:#1b1340;--bg2:#2a1d66;--card:#ffffff14;--card2:#ffffff22;--tx:#fff;--mut:#b9b0e8;--pri:#8b5cf6;--ok:#22c55e;--bad:#ef4444;--gold:#ffd24a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+body{background:radial-gradient(1200px 600px at 50% -10%,#4b2fb8 0%,var(--bg) 60%) fixed}
+#app{max-width:560px;margin:0 auto;min-height:100%;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 24px)}
+h1,h2,h3{margin:0}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--tx);background:#0003;border:2px solid #ffffff2a;border-radius:14px;padding:12px 14px;width:100%;outline:none}
+input:focus,textarea:focus{border-color:var(--pri)}
+select option{color:#000}
+.btn{background:var(--pri);padding:14px 18px;border-radius:16px;font-weight:700;font-size:16px;box-shadow:0 4px 0 #5b34c4;width:100%}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #5b34c4}
+.btn.alt{background:var(--card2);box-shadow:0 4px 0 #0004}
+.btn.sm{width:auto;padding:8px 14px;font-size:14px;border-radius:12px;box-shadow:none}
+.btn.red{background:var(--bad);box-shadow:0 4px 0 #a02020}
+.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}
+.gap{height:12px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.top .bar{flex:1;height:12px;background:#ffffff22;border-radius:9px;overflow:hidden}
+.top .bar i{display:block;height:100%;background:linear-gradient(90deg,#a78bfa,var(--gold));border-radius:9px;transition:width .3s}
+.top span{font-weight:700;color:var(--mut);min-width:44px;text-align:right}
+.x,.back{background:var(--card);width:40px;height:40px;border-radius:12px;font-size:18px}
+.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.hd h1{font-size:22px;letter-spacing:-.5px;white-space:nowrap}
+.pills{display:flex;gap:6px}
+.pill{background:var(--card);padding:6px 10px;border-radius:99px;font-weight:700;font-size:14px;white-space:nowrap}
+.panel{background:var(--card);border-radius:20px;padding:14px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g{background:var(--card);border-radius:20px;padding:16px 12px;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:112px;border:2px solid transparent}
+.g:active{transform:scale(.97);background:var(--card2)}
+.g .ic{font-size:30px}.g b{font-size:16px}.g small{color:var(--mut);line-height:1.25}
+.g.dis{opacity:.4}
+.mut{color:var(--mut)}
+.center{text-align:center}
+.q{display:flex;flex-direction:column;gap:14px}
+.prompt{background:var(--card);border-radius:22px;padding:24px 16px;text-align:center}
+.prompt .lbl{color:var(--mut);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.prompt .big{font-size:32px;font-weight:800;word-break:break-word}
+.prompt .sent{font-size:19px;line-height:1.5;margin-top:10px}
+.prompt .sent u{text-decoration:none;border-bottom:3px dashed var(--gold);padding:0 10px;color:var(--gold)}
+.spk{background:var(--card2);border-radius:50%;width:44px;height:44px;font-size:20px;margin-top:10px}
+.opts{display:grid;gap:10px}
+.opt{background:var(--card);border:2px solid #ffffff2a;border-radius:16px;padding:15px;font-size:18px;font-weight:600;text-align:center}
+.opt:active{background:var(--card2)}
+.opt.good{background:#22c55e44;border-color:var(--ok)}.opt.bad{background:#ef444444;border-color:var(--bad)}
+.pat{font-size:30px;font-weight:800;letter-spacing:.12em;font-family:ui-monospace,Menlo,monospace;color:var(--gold);word-break:break-all}
+.fb{position:fixed;left:0;right:0;bottom:0;padding:16px 16px calc(env(safe-area-inset-bottom) + 16px);border-radius:24px 24px 0 0;animation:up .2s;z-index:5}
+.fb>*{max-width:528px;margin-left:auto;margin-right:auto}
+.fb b{font-size:20px;display:block}.fb div{margin:4px auto 12px}
+.fb.good{background:#14532d}.fb.bad{background:#7f1d1d}
+.fb .btn{background:#fff;color:#111;box-shadow:none;display:block}
+@keyframes up{from{transform:translateY(100%)}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:54px}
+.tile{background:var(--pri);border-radius:12px;min-width:46px;height:50px;font-size:24px;font-weight:800;box-shadow:0 3px 0 #5b34c4;text-transform:lowercase}
+.tile.used{opacity:.25;box-shadow:none}
+.slots .tile{background:var(--card2);box-shadow:none;border:2px dashed #ffffff44}
+.slots .tile.f{background:var(--gold);color:#222;border:2px solid var(--gold)}
+.cardwrap{perspective:1000px;height:300px}
+.card{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+.card.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;gap:8px}
+.face.f{background:linear-gradient(145deg,#7c4dff,#4527a0)}
+.face.b{background:linear-gradient(145deg,#f59e0b,#d97706);transform:rotateY(180deg)}
+.face .w{font-size:36px;font-weight:800;word-break:break-word}.face .e{font-size:16px;opacity:.9;font-style:italic}
+.face .hint{position:absolute;bottom:12px;font-size:12px;opacity:.7}
+.list .it{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.it .t{flex:1;min-width:0}.it .t b{display:block}.it .t span{color:var(--mut);font-size:14px}
+.dots{display:flex;gap:3px}.dots i{width:7px;height:7px;border-radius:50%;background:#ffffff33}.dots i.on{background:var(--gold)}
+.mi{background:#0000;font-size:18px;width:36px;height:36px;border-radius:10px;flex:none}.mi:active{background:var(--card2)}
+.modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+.modal .box{background:#2a1d66;border-radius:22px;padding:20px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px}
+.timer{font-size:22px;font-weight:800;color:var(--gold)}
+.mt{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mt .opt{font-size:16px;padding:14px 8px;min-height:60px;display:flex;align-items:center;justify-content:center}
+.mt .opt.sel{border-color:var(--gold);background:#ffd24a33}.mt .opt.done{opacity:.25;pointer-events:none}
+.big-emoji{font-size:72px;text-align:center}
+.seg{display:flex;background:#0003;border-radius:14px;padding:4px;gap:4px}.seg button{flex:1;background:none;padding:8px;border-radius:10px;font-weight:700;font-size:14px;color:var(--mut)}.seg button.on{background:var(--pri);color:#fff}
+.hide{display:none}
+.chk{display:flex;gap:8px;align-items:center;color:var(--mut);font-size:14px}.chk input{width:auto}
+:lang(ka) .prompt .lbl{text-transform:none;letter-spacing:0}
+.pill{border:0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------- yardımcılar ---------- */
+const $=s=>document.querySelector(s), app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const norm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+const today=()=>new Date().toLocaleDateString('en-CA');
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,i)=>i);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function judge(a,b){a=norm(a);b=norm(b);if(!a)return 0;if(a===b)return 2;if(b.length>=5&&lev(a,b)===1)return 1;return 0}
+
+/* ---------- veri ---------- */
+const DET=(navigator.language||'').toLowerCase().startsWith('ka')?'ka':'tr';
+const SAMPLE=[
+['apple','elma','ვაშლი','I eat an apple every morning.'],['book','kitap','წიგნი','She is reading a book.'],['happy','mutlu','ბედნიერი','The children are happy today.'],
+['beautiful','güzel','ლამაზი','What a beautiful garden!'],['difficult','zor','რთული','This exam is very difficult.'],['borrow','ödünç almak','სესხება','Can I borrow your pen?'],
+['remember','hatırlamak','დამახსოვრება','I cannot remember his name.'],['journey','yolculuk','მოგზაურობა','The journey took three days.'],['knowledge','bilgi','ცოდნა','Knowledge is power.'],
+['environment','çevre','გარემო','We must protect the environment.'],['achieve','başarmak','მიღწევა','You can achieve your goals.'],['improve','geliştirmek','გაუმჯობესება','I want to improve my English.'],
+['borrow money','borç para almak','ფულის სესხება',''],['deadline','son teslim tarihi','ბოლო ვადა','The deadline is on Friday.'],['experience','deneyim','გამოცდილება','She has a lot of experience.'],
+['choose','seçmek','არჩევა','Please choose a color.'],['neighbor','komşu','მეზობელი','Our neighbor is very kind.'],['weather','hava durumu','ამინდი','The weather is lovely today.'],
+['strong','güçlü','ძლიერი','He is strong enough to lift it.'],['surprise','sürpriz','სიურპრიზი','It was a big surprise.'],['believe','inanmak','დაჯერება','I believe in you.'],
+['careful','dikkatli','ფრთხილი','Be careful with that glass.'],['forget','unutmak','დავიწყება','Don\'t forget your keys.'],['enough','yeterli','საკმარისი','We have enough time.']
+];
+function fresh(){const id=uid();return{decks:[{id,name:DET==='ka'?'ჩემი სიტყვები':'Kelimelerim',words:[]}],cur:id,xp:0,streak:0,last:'',lang:DET,ui:DET,dir:'tr2en',len:10,sound:true,best:0}}
+function load(){try{const s=JSON.parse(localStorage.getItem('wp1'));if(s&&s.decks&&s.decks.length){if(!s.decks.find(d=>d.id===s.cur))s.cur=s.decks[0].id;return s}}catch(e){}return fresh()}
+let S=load();
+let UI=S.ui||DET;S.ui=UI;document.documentElement.lang=UI;
+const KA={
+'Kelimelerim':'ჩემი სიტყვები','Tamam':'კარგი','Vazgeç':'გაუქმება','Kartlar':'ბარათები','Çevir, hatırla, öğren':'გადაატრიალე, დაიმახსოვრე, ისწავლე',
+'Anlamını Bul':'იპოვე თარგმანი','İngilizce kelime → doğru anlam':'ინგლისური სიტყვა → სწორი თარგმანი','İngilizcesini Bul':'იპოვე ინგლისური','Anlam → doğru İngilizce kelime':'თარგმანი → სწორი ინგლისური სიტყვა',
+'Yaz Bakalım':'დაწერე','Anlamı gör, İngilizcesini yaz':'ნახე თარგმანი, დაწერე ინგლისურად','Boşluk Doldur':'შეავსე გამოტოვებული','Cümledeki / kelimedeki boşluğu tamamla':'შეავსე გამოტოვებული სიტყვა ან ასო',
+'Harf Karması':'არეული ასოები','Harfleri doğru sıraya diz':'დააწყვე ასოები სწორად','Dinle & Yaz':'მოუსმინე და დაწერე','Telaffuzu duy, kelimeyi yaz':'მოისმინე გამოთქმა და დაწერე სიტყვა',
+'Eşleştir':'შეუწყვილე','Kelime ve anlam çiftlerini bul':'იპოვე სიტყვისა და თარგმანის წყვილები','Hız Turu':'სიჩქარის რაუნდი','60 saniye, kombo yap':'60 წამი, შექმენი კომბო',
+'Sv.':'დონე ','📝 Kelimeler':'📝 სიტყვები','{0} kelime • {1} tanesi iyice öğrenildi • XP: {2}':'{0} სიტყვა • {1} კარგად ნასწავლია • XP: {2}','Henüz kelime yok. Önce kelime ekle!':'სიტყვები ჯერ არ არის. ჯერ დაამატე სიტყვები!',
+'10 soru':'10 კითხვა','20 soru':'20 კითხვა','Hepsi':'ყველა','➕ Kelime ekle':'➕ სიტყვის დამატება','🏆 Hız Turu rekoru: {0}':'🏆 სიჩქარის რეკორდი: {0}',
+'Biraz daha kelime lazım':'მეტი სიტყვაა საჭირო','Önce kelime ekle':'ჯერ დაამატე სიტყვები',
+'Doğru! 🎉':'სწორია! 🎉','Olmadı 😅':'არასწორია 😅','Devam':'გაგრძელება','Bu kelimenin anlamı ne?':'რას ნიშნავს ეს სიტყვა?','İngilizcesi hangisi?':'რომელია ინგლისური?',
+'İngilizcesini yaz…':'დაწერე ინგლისურად…','💡 İpucu':'💡 მინიშნება','Kontrol et':'შემოწმება','Neredeyse! Doğrusu: ':'თითქმის! სწორია: ','İngilizcesini yaz':'დაწერე ინგლისურად',
+'Boşluğa gelecek kelime: ':'სიტყვა გამოტოვებულ ადგილას: ','Eksik harfleri tamamla':'შეავსე გამოტოვებული ასოები','Harfleri diz':'დააწყვე ასოები','↩︎ Geri al':'↩︎ უკან',
+'Duyduğunu yaz':'დაწერე, რასაც გაიგონებ','🐢 Yavaş':'🐢 ნელა','👁 Anlamı göster':'👁 აჩვენე თარგმანი','Bu cihazda sesli okuma yok.':'ამ მოწყობილობაზე ხმოვანი წაკითხვა არ არის.',
+'Soldaki kelimeyi, sağdaki anlamıyla eşleştir':'შეუწყვილე მარცხენა სიტყვა მარჯვენა თარგმანს','Anlamı ne?':'რას ნიშნავს?','İngilizcesi ne?':'როგორ იქნება ინგლისურად?',
+'Anlam → İngilizce':'თარგმანი → ინგლისური','İngilizce → Anlam':'ინგლისური → თარგმანი','dokun ve çevir':'შეეხე და გადაატრიალე','😕 Tekrar göster':'😕 კიდევ მაჩვენე','😎 Biliyorum':'😎 ვიცი',
+'Kart destesi bitti!':'ბარათები დასრულდა!','{0} kelime • {1} kez tekrar gösterildi':'{0} სიტყვა • {1}-ჯერ გამეორდა','🔁 Tekrar':'🔁 თავიდან','Ana sayfa':'მთავარი',
+'{0} doğru!':'{0} სწორი!','Harika!':'შესანიშნავია!','Çok iyi!':'ძალიან კარგი!','Fena değil!':'არა უშავს!','Pratik yapmaya devam!':'გააგრძელე ვარჯიში!',
+'🏆 Yeni rekor!':'🏆 ახალი რეკორდი!','Rekor: {0}':'რეკორდი: {0}','{0} / {1} doğru':'{0} / {1} სწორი','• 🔥 {0} gün':'• 🔥 {0} დღე','Tekrar etmen gerekenler':'გასამეორებელი სიტყვები','🔁 Tekrar oyna':'🔁 თავიდან თამაში',
+'Kelime ekle':'სიტყვების დამატება','⋯ Liste':'⋯ სია',
+'Her satıra bir kelime: <b>apple - elma</b> (ya da <b>apple = elma</b>). Sadece <b>apple</b> yazarsan anlamı internetten otomatik bulunur.':'თითო სტრიქონზე ერთი სიტყვა: <b>apple - ვაშლი</b> (ან <b>apple = ვაშლი</b>). თუ მხოლოდ <b>apple</b> დაწერე, თარგმანს ინტერნეტში ავტომატურად მოძებნის.',
+'Anlam dili':'თარგმანის ენა','Ters yazdım (anlam - İngilizce)':'შებრუნებულად დავწერე (თარგმანი - ინგლისური)','✨ Örnek yükle':'✨ ნიმუში','➕ Ekle':'➕ დამატება','🔍 Ara…':'🔍 ძიება…',
+'{0} yeni kelime eklendi.':'{0} ახალი სიტყვა დაემატა.','{0} örnek kelime eklendi.':'{0} ნიმუში დაემატა.','<i>anlam yok – düzenle</i>':'<i>თარგმანი არ არის – შეცვალე</i>','Liste boş':'სია ცარიელია',
+'Kelimeyi düzenle':'სიტყვის შეცვლა','İngilizce':'ინგლისური','Anlamı':'თარგმანი','Örnek cümle (isteğe bağlı)':'მაგალითი წინადადება (არასავალდებულო)','Kaydet':'შენახვა','Bu kelime silinsin mi?':'წაიშალოს ეს სიტყვა?','Sil':'წაშლა',
+'Liste işlemleri':'სიის მოქმედებები','➕ Yeni liste':'➕ ახალი სია','✏️ Adını değiştir':'✏️ სახელის შეცვლა','📤 Kelimeleri kopyala':'📤 სიტყვების კოპირება','♻️ İlerlemeyi sıfırla':'♻️ პროგრესის განულება','🗑 Listeyi sil':'🗑 სიის წაშლა','Kapat':'დახურვა',
+'Yeni liste':'ახალი სია','Liste adı':'სიის სახელი','Oluştur':'შექმნა','Kopyalandı ✔':'დაკოპირდა ✔','Kelimeler (kopyala)':'სიტყვები (დააკოპირე)','Tüm ilerleme sıfırlansın mı?':'განულდეს მთელი პროგრესი?','Sıfırla':'განულება','“{0}” listesi silinsin mi?':'წაიშალოს სია „{0}“?',
+'Anlam bulundu: {0}':'თარგმანი ნაპოვნია: {0}',' • bulunamayan: {0} (✏️ ile elle yaz)':' • ვერ მოიძებნა: {0} (✏️-ით ხელით დაწერე)'
+};
+const t=(k,...a)=>{const s=(UI==='ka'&&KA[k])||k;return a.length?s.replace(/\{(\d)\}/g,(_,i)=>a[i]):s};
+function save(){try{localStorage.setItem('wp1',JSON.stringify(S))}catch(e){}}
+const deck=()=>S.decks.find(d=>d.id===S.cur);
+const pw=()=>deck().words.filter(w=>w.tr);   // oynanabilir kelimeler
+const mkWord=(en,tr,ex)=>({id:uid(),en:en.trim(),tr:(tr||'').trim(),ex:(ex||'').trim(),m:0,seen:0});
+function pick(n){return shuffle(pw()).sort((a,b)=>(a.m+Math.random()*2)-(b.m+Math.random()*2)).slice(0,n)}
+
+/* ---------- ses & konuşma ---------- */
+let AC;
+function sfx(ok){if(!S.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type='sine';const t=AC.currentTime;o.frequency.setValueAtTime(ok?660:200,t);if(ok)o.frequency.setValueAtTime(880,t+.09);g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.26)}catch(e){}}
+function speak(t,rate=.9){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=rate;speechSynthesis.speak(u)}catch(e){}}
+
+/* ---------- gezinme ---------- */
+let G=null,timer=null,screen='home';
+function stopTimers(){clearInterval(timer);timer=null;try{speechSynthesis.cancel()}catch(e){}}
+function nav(s,fn){stopTimers();if(s!=='home'&&screen==='home')history.pushState({s},'');screen=s;fn()}
+addEventListener('popstate',()=>{stopTimers();screen='home';home()});
+function toHome(){stopTimers();if(screen!=='home'){screen='home';if(history.state)history.back();else home()}else home()}
+
+/* ---------- modal ---------- */
+function modal(title,fields,ok,okLabel=t('Tamam'),danger){
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="box"><h3>${esc(title)}</h3>${fields.map((f,i)=>`<input data-i="${i}" placeholder="${esc(f.ph||'')}" value="${esc(f.v||'')}">`).join('')}<div class="row"><button class="btn alt" data-c>${t('Vazgeç')}</button><button class="btn ${danger?'red':''}" data-o>${okLabel}</button></div></div>`;
+  document.body.appendChild(m);
+  const f=m.querySelector('input');if(f)f.focus();
+  const close=()=>m.remove(),go=()=>{const v=[...m.querySelectorAll('input')].map(i=>i.value);close();ok(v)};
+  m.querySelector('[data-c]').onclick=close;m.querySelector('[data-o]').onclick=go;
+  m.addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+}
+
+/* ---------- ana sayfa ---------- */
+const GAMES=[
+ {id:'cards',ic:'🃏',t:'Kartlar',d:'Çevir, hatırla, öğren',min:1},
+ {id:'mcEn',ic:'🎯',t:'Anlamını Bul',d:'İngilizce kelime → doğru anlam',min:3},
+ {id:'mcTr',ic:'🔤',t:'İngilizcesini Bul',d:'Anlam → doğru İngilizce kelime',min:3},
+ {id:'typeEn',ic:'⌨️',t:'Yaz Bakalım',d:'Anlamı gör, İngilizcesini yaz',min:1},
+ {id:'blank',ic:'🧩',t:'Boşluk Doldur',d:'Cümledeki / kelimedeki boşluğu tamamla',min:1},
+ {id:'scramble',ic:'🔀',t:'Harf Karması',d:'Harfleri doğru sıraya diz',min:1},
+ {id:'listen',ic:'🎧',t:'Dinle & Yaz',d:'Telaffuzu duy, kelimeyi yaz',min:1},
+ {id:'match',ic:'🔗',t:'Eşleştir',d:'Kelime ve anlam çiftlerini bul',min:3},
+ {id:'speed',ic:'⚡',t:'Hız Turu',d:'60 saniye, kombo yap',min:3},
+];
+function home(){
+  screen='home';G=null;const d=deck(),n=pw().length,lv=Math.floor(S.xp/100)+1;
+  const mastered=d.words.filter(w=>w.m>=4).length;
+  app.innerHTML=`
+  <div class="hd"><h1>WordPlay ✨</h1><div class="pills"><span class="pill">🔥 ${S.streak}</span><span class="pill">⭐ ${t('Sv.')}${lv}</span><button class="pill" data-act="lang" style="color:inherit;font:inherit;font-weight:700">🌐 ${UI==='ka'?'KA':'TR'}</button></div></div>
+  <div class="panel">
+    <div class="row"><select id="dsel">${S.decks.map(x=>`<option value="${x.id}" ${x.id===S.cur?'selected':''}>${esc(x.name)} (${x.words.length})</option>`).join('')}</select>
+    <button class="btn sm" data-act="words" style="flex:none">${t('📝 Kelimeler')}</button></div>
+    <div class="gap"></div>
+    <div class="mut" style="font-size:14px">${n?t('{0} kelime • {1} tanesi iyice öğrenildi • XP: {2}',n,mastered,S.xp):t('Henüz kelime yok. Önce kelime ekle!')}</div>
+    <div class="gap"></div>
+    <div class="seg" id="len">${[[10,'10 soru'],[20,'20 soru'],[0,'Hepsi']].map(([v,l])=>`<button data-len="${v}" class="${S.len===v?'on':''}">${t(l)}</button>`).join('')}</div>
+  </div>
+  ${n===0?`<button class="btn" data-act="words">${t('➕ Kelime ekle')}</button><div class="gap"></div>`:''}
+  <div class="grid">${GAMES.map(g=>`<button class="g ${n<g.min?'dis':''}" data-game="${g.id}"><span class="ic">${g.ic}</span><b>${t(g.t)}</b><small>${t(g.d)}</small></button>`).join('')}</div>
+  <div class="gap"></div><div class="center mut" style="font-size:13px">${t('🏆 Hız Turu rekoru: {0}',S.best)}</div>`;
+  $('#dsel').onchange=e=>{S.cur=e.target.value;save();home()};
+}
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act],[data-game],[data-len]');if(!el)return;
+  if(el.dataset.len!==undefined){S.len=+el.dataset.len;save();return home()}
+  if(el.dataset.game){const g=GAMES.find(x=>x.id===el.dataset.game);if(pw().length<g.min){return modal(t(pw().length?'Biraz daha kelime lazım':'Önce kelime ekle'),[],()=>{})}return start(g.id)}
+  const a=el.dataset.act;
+  if(a==='lang'){UI=S.ui=UI==='tr'?'ka':'tr';if(S.lang==='tr'||S.lang==='ka')S.lang=UI;document.documentElement.lang=UI;save();return home()}
+  if(a==='home')toHome();else if(a==='words')nav('words',wordsScreen);else if(a==='next')next();
+});
+
+/* ---------- oyun motoru ---------- */
+function start(id){
+  if(id==='cards')return nav('game',cards);
+  if(id==='match')return nav('game',match);
+  if(id==='speed')return nav('game',speed);
+  const all=pw().length,n=S.len===0?all:Math.min(S.len,all);
+  G={id,q:pick(n),i:0,ok:0,miss:[],xp:0,locked:false};
+  nav('game',ask);
+}
+function frame(body){
+  app.innerHTML=`<div class="top"><button class="x" data-act="home">✕</button><div class="bar"><i style="width:${G.i/G.q.length*100}%"></i></div><span>${G.i+1}/${G.q.length}</span></div><div class="q">${body}</div><div id="fb"></div>`;
+}
+function ask(){
+  if(G.i>=G.q.length)return finish();
+  G.locked=false;const w=G.q[G.i];
+  ({mcEn,mcTr,typeEn,blank,scramble,listen}[G.id])(w);
+}
+function done(ok,w,msg,auto=true){
+  if(G.locked)return;G.locked=true;
+  w.seen=(w.seen||0)+1;
+  if(ok){G.ok++;w.m=Math.min(5,(w.m||0)+1);G.xp+=10;sfx(true)}else{w.m=Math.max(0,(w.m||0)-1);if(!G.miss.includes(w))G.miss.push(w);sfx(false);try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}
+  save();
+  $('#fb').innerHTML=`<div class="fb ${ok?'good':'bad'}"><b>${t(ok?'Doğru! 🎉':'Olmadı 😅')}</b><div>${msg||''}</div><button class="btn" data-act="next">${t('Devam')}</button></div>`;
+  if(ok&&auto&&!msg){const i=G.i;setTimeout(()=>{if(G&&G.i===i&&screen==='game')next()},800)}
+}
+function next(){if(!G||!G.locked)return;G.i++;ask()}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&G&&G.locked&&screen==='game'&&G.id!=='speed'&&!document.querySelector('.modal'))next()});
+const wordTr=w=>`<b>${esc(w.en)}</b> = ${esc(w.tr)}`;
+function options(w,key,count=4){
+  const lc=norm(w[key]);
+  const others=shuffle(pw().filter(x=>x.id!==w.id&&norm(x[key])!==lc)).slice(0,count-1);
+  return shuffle([w,...others]);
+}
+function mcHandler(w,key,opts){
+  document.querySelectorAll('.opt[data-id]').forEach(b=>b.onclick=()=>{
+    if(G.locked)return;const ok=b.dataset.id===w.id;
+    b.classList.add(ok?'good':'bad');
+    if(!ok){const c=document.querySelector(`.opt[data-id="${w.id}"]`);c&&c.classList.add('good');b.classList.add('shake')}
+    done(ok,w,ok?'':wordTr(w));
+  });
+}
+/* 1) İngilizce → anlam seç */
+function mcEn(w){
+  const o=options(w,'tr');
+  frame(`<div class="prompt"><div class="lbl">${t('Bu kelimenin anlamı ne?')}</div><div class="big">${esc(w.en)}</div><button class="spk" onclick="speak('${esc(w.en).replace(/'/g,"\\'")}')">🔊</button></div>
+  <div class="opts">${o.map(x=>`<button class="opt" data-id="${x.id}">${esc(x.tr)}</button>`).join('')}</div>`);
+  mcHandler(w);
+}
+/* 2) anlam → İngilizce seç */
+function mcTr(w){
+  const o=options(w,'en');
+  frame(`<div class="prompt"><div class="lbl">${t('İngilizcesi hangisi?')}</div><div class="big">${esc(w.tr)}</div></div>
+  <div class="opts">${o.map(x=>`<button class="opt" data-id="${x.id}">${esc(x.en)}</button>`).join('')}</div>`);
+  mcHandler(w);
+}
+/* yazma altyapısı */
+function typeUI(w,{label,bigHtml,extra=''}){
+  frame(`<div class="prompt"><div class="lbl">${label}</div>${bigHtml}</div>${extra}
+  <input id="ans" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="${t('İngilizcesini yaz…')}">
+  <div class="row"><button class="btn alt" id="hint">${t('💡 İpucu')}</button><button class="btn" id="chk">${t('Kontrol et')}</button></div>`);
+  const inp=$('#ans');setTimeout(()=>inp.focus(),50);let hints=0;
+  $('#hint').onclick=()=>{if(G.locked)return;hints++;inp.placeholder=w.en.slice(0,hints)+'…';G.xp-=2;inp.focus()};
+  const submit=()=>{
+    if(G.locked)return;const r=judge(inp.value,w.en);if(!inp.value.trim())return;
+    inp.disabled=true;
+    done(r>0,w,r===1?t('Neredeyse! Doğrusu: ')+wordTr(w):(r===2?'':wordTr(w)),true);
+  };
+  $('#chk').onclick=submit;inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();G.locked?next():submit()}});
+}
+/* 3) anlamı gör, yaz */
+function typeEn(w){typeUI(w,{label:t('İngilizcesini yaz'),bigHtml:`<div class="big">${esc(w.tr)}</div>`})}
+/* 4) boşluk doldur */
+function blank(w){
+  const re=new RegExp('(^|[^A-Za-z])('+w.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-z])','i');
+  if(w.ex&&re.test(w.ex)){
+    const s=esc(w.ex).replace(new RegExp('(^|[^A-Za-z])('+esc(w.en).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-z])','i'),'$1<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>');
+    typeUI(w,{label:t('Boşluğa gelecek kelime: ')+esc(w.tr),bigHtml:`<div class="sent">${s}</div>`});
+  }else{
+    const ch=[...w.en];const idx=ch.map((c,i)=>/[A-Za-z]/.test(c)&&i>0?i:-1).filter(i=>i>=0);
+    const hide=new Set(shuffle(idx).slice(0,Math.max(1,Math.ceil(idx.length*.55))));
+    const pat=ch.map((c,i)=>hide.has(i)?'_':c).join(' ');
+    typeUI(w,{label:t('Eksik harfleri tamamla'),bigHtml:`<div class="big">${esc(w.tr)}</div><div class="gap"></div><div class="pat">${esc(pat)}</div>`});
+  }
+}
+/* 5) harf karması */
+function scramble(w){
+  const letters=[...w.en.replace(/\s+/g,'')];
+  let sh=shuffle(letters);for(let k=0;k<5&&sh.join('')===letters.join('')&&letters.length>1;k++)sh=shuffle(letters);
+  const tiles=sh.map((c,i)=>({c,i,used:false}));let ans=[];
+  frame(`<div class="prompt"><div class="lbl">${t('Harfleri diz')}</div><div class="big">${esc(w.tr)}</div></div>
+  <div class="tiles slots" id="slots"></div><div class="tiles" id="pool"></div>
+  <div class="row"><button class="btn alt" id="clr">${t('↩︎ Geri al')}</button><button class="btn alt" id="hnt">${t('💡 İpucu')}</button></div>`);
+  const draw=()=>{
+    $('#slots').innerHTML=letters.map((_,k)=>ans[k]!==undefined?`<button class="tile f" data-k="${k}">${esc(tiles[ans[k]].c)}</button>`:`<button class="tile">&nbsp;</button>`).join('');
+    $('#pool').innerHTML=tiles.map((x,k)=>`<button class="tile ${x.used?'used':''}" data-p="${k}">${esc(x.c)}</button>`).join('');
+    document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{if(G.locked)return;const k=+b.dataset.p;if(tiles[k].used)return;tiles[k].used=true;ans.push(k);draw();if(ans.length===letters.length){const r=ans.map(i=>tiles[i].c).join('');done(norm(r)===norm(letters.join('')),w,norm(r)===norm(letters.join(''))?'':wordTr(w))}});
+    document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{if(G.locked)return;const k=+b.dataset.k;if(k!==ans.length-1)return;tiles[ans.pop()].used=false;draw()});
+  };
+  $('#clr').onclick=()=>{if(G.locked||!ans.length)return;tiles[ans.pop()].used=false;draw()};
+  $('#hnt').onclick=()=>{if(G.locked)return;while(ans.length)tiles[ans.pop()].used=false;const c=letters[0];const k=tiles.findIndex(x=>!x.used&&x.c===c);tiles[k].used=true;ans.push(k);G.xp-=2;draw()};
+  draw();
+}
+/* 6) dinle yaz */
+function listen(w){
+  const ok=('speechSynthesis' in window);
+  typeUI(w,{label:t('Duyduğunu yaz'),bigHtml:`<button class="spk" id="s1" style="width:80px;height:80px;font-size:36px;margin:0">🔊</button><div class="row" style="margin-top:12px;justify-content:center"><button class="btn alt sm" id="s2" style="flex:none">${t('🐢 Yavaş')}</button><button class="btn alt sm" id="s3" style="flex:none">${t('👁 Anlamı göster')}</button></div><div id="mean" class="mut" style="margin-top:8px"></div>${ok?'':'<div class="mut">'+t('Bu cihazda sesli okuma yok.')+'</div>'}`});
+  $('#s1').onclick=()=>speak(w.en,.9);$('#s2').onclick=()=>speak(w.en,.5);$('#s3').onclick=()=>{$('#mean').textContent=w.tr;G.xp-=2};
+  setTimeout(()=>speak(w.en,.9),300);
+}
+
+/* ---------- eşleştirme ---------- */
+function match(){
+  const ws=pick(Math.min(6,pw().length));
+  G={id:'match',q:ws,i:0,ok:0,miss:[],xp:0,locked:false,moves:0,matched:0};
+  const L=shuffle(ws),R=shuffle(ws);let sel=null;
+  app.innerHTML=`<div class="top"><button class="x" data-act="home">✕</button><div class="bar"><i id="pb" style="width:0%"></i></div><span id="pc">0/${ws.length}</span></div>
+  <div class="center mut" style="margin-bottom:12px">${t('Soldaki kelimeyi, sağdaki anlamıyla eşleştir')}</div>
+  <div class="mt"><div class="opts" id="L">${L.map(w=>`<button class="opt" data-s="L" data-id="${w.id}">${esc(w.en)}</button>`).join('')}</div>
+  <div class="opts" id="R">${R.map(w=>`<button class="opt" data-s="R" data-id="${w.id}">${esc(w.tr)}</button>`).join('')}</div></div>`;
+  const bad=new Set();
+  document.querySelectorAll('.mt .opt').forEach(b=>b.onclick=()=>{
+    if(b.classList.contains('done'))return;
+    if(b.dataset.s==='L')speak(b.textContent,.9);
+    if(sel&&sel.dataset.s===b.dataset.s){sel.classList.remove('sel');sel=b.dataset.s&&b===sel?null:b;if(sel)sel.classList.add('sel');return}
+    if(!sel){sel=b;b.classList.add('sel');return}
+    const a=sel;a.classList.remove('sel');sel=null;
+    if(a.dataset.id===b.dataset.id){
+      a.classList.add('done','good');b.classList.add('done','good');G.matched++;sfx(true);
+      $('#pb').style.width=G.matched/ws.length*100+'%';$('#pc').textContent=G.matched+'/'+ws.length;
+      if(G.matched===ws.length)setTimeout(()=>{
+        ws.forEach(w=>{w.seen=(w.seen||0)+1;if(bad.has(w.id)){w.m=Math.max(0,(w.m||0)-1);G.miss.push(w)}else{w.m=Math.min(5,(w.m||0)+1);G.ok++}});
+        G.xp=Math.max(10,G.ok*8-bad.size*2);save();finish();
+      },500);
+    }else{
+      sfx(false);bad.add(a.dataset.id);bad.add(b.dataset.id);[a,b].forEach(x=>{x.classList.add('bad','shake');setTimeout(()=>x.classList.remove('bad','shake'),350)});
+    }
+  });
+}
+
+/* ---------- hız turu ---------- */
+function speed(){
+  G={id:'speed',q:[],i:0,ok:0,miss:[],xp:0,locked:false,combo:0,left:60,pool:[],total:0};
+  const tick=()=>{const t=$('#tm');if(t)t.textContent='⏱ '+G.left;};
+  const nextQ=()=>{
+    if(!G.pool.length)G.pool=shuffle(pw());
+    const w=G.pool.pop(),dir=Math.random()<.5?'tr':'en',other=dir==='tr'?'en':'tr';
+    const o=options(w,dir);
+    app.innerHTML=`<div class="top"><button class="x" data-act="home">✕</button><span class="timer" id="tm">⏱ ${G.left}</span><div class="bar" style="visibility:hidden"></div><span>✅ ${G.ok}${G.combo>1?' 🔥'+G.combo:''}</span></div>
+    <div class="q"><div class="prompt"><div class="lbl">${t(dir==='tr'?'Anlamı ne?':'İngilizcesi ne?')}</div><div class="big">${esc(w[other])}</div></div>
+    <div class="opts">${o.map(x=>`<button class="opt" data-id="${x.id}">${esc(x[dir])}</button>`).join('')}</div></div>`;
+    document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(G.locked)return;G.locked=true;const ok=b.dataset.id===w.id;G.total++;
+      w.seen=(w.seen||0)+1;
+      if(ok){G.ok++;G.combo++;w.m=Math.min(5,(w.m||0)+1);b.classList.add('good');sfx(true);if(G.combo%5===0)G.left+=3}
+      else{G.combo=0;w.m=Math.max(0,(w.m||0)-1);if(!G.miss.includes(w))G.miss.push(w);b.classList.add('bad');const c=document.querySelector(`.opt[data-id="${w.id}"]`);c&&c.classList.add('good');sfx(false)}
+      setTimeout(()=>{G.locked=false;if(G.left>0)nextQ()},ok?250:700);
+    });
+  };
+  nextQ();
+  timer=setInterval(()=>{G.left--;tick();if(G.left<=0){clearInterval(timer);timer=null;G.xp=G.ok*5;if(G.ok>S.best)S.best=G.ok;save();finish()}},1000);
+}
+
+/* ---------- kartlar ---------- */
+function cards(){
+  let q=shuffle(pw()).sort((a,b)=>(a.m+Math.random())-(b.m+Math.random())),flip=false,known=0,total=q.length,again=0;
+  const draw=()=>{
+    if(!q.length)return cardsEnd(known,total,again);
+    const w=q[0],front=S.dir==='tr2en'?'tr':'en',back=front==='tr'?'en':'tr';
+    app.innerHTML=`<div class="top"><button class="x" data-act="home">✕</button><div class="bar"><i style="width:${known/total*100}%"></i></div><span>${known}/${total}</span></div>
+    <div class="seg" style="margin-bottom:14px"><button data-d="tr2en" class="${S.dir==='tr2en'?'on':''}">${t('Anlam → İngilizce')}</button><button data-d="en2tr" class="${S.dir==='en2tr'?'on':''}">${t('İngilizce → Anlam')}</button></div>
+    <div class="cardwrap"><div class="card ${flip?'flip':''}" id="cd">
+      <div class="face f"><div class="w">${esc(w[front])}</div>${front==='en'?`<button class="spk" id="sp1">🔊</button>`:''}<div class="hint">${t('dokun ve çevir')}</div></div>
+      <div class="face b"><div class="w">${esc(w[back])}</div>${w.ex?`<div class="e">“${esc(w.ex)}”</div>`:''}${back==='en'?`<button class="spk" id="sp2">🔊</button>`:''}</div></div></div>
+    <div class="gap"></div>
+    <div class="row ${flip?'':'hide'}" id="kb"><button class="btn alt" id="no">${t('😕 Tekrar göster')}</button><button class="btn" id="yes">${t('😎 Biliyorum')}</button></div>`;
+    $('#cd').onclick=e=>{if(e.target.closest('.spk'))return;flip=!flip;$('#cd').classList.toggle('flip',flip);$('#kb').classList.toggle('hide',!flip);if(flip&&back==='en')speak(w.en)};
+    const s1=$('#sp1'),s2=$('#sp2');if(s1)s1.onclick=()=>speak(w.en);if(s2)s2.onclick=()=>speak(w.en);
+    app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{S.dir=b.dataset.d;flip=false;save();draw()});
+    $('#yes').onclick=()=>{w.m=Math.min(5,(w.m||0)+1);w.seen=(w.seen||0)+1;known++;q.shift();flip=false;sfx(true);save();draw()};
+    $('#no').onclick=()=>{w.m=Math.max(0,(w.m||0)-1);again++;q.shift();q.splice(Math.min(3,q.length),0,w);flip=false;sfx(false);save();draw()};
+  };
+  draw();
+}
+function cardsEnd(known,total,again){
+  G={xp:known*3,id:'cards'};reward();
+  app.innerHTML=`<div class="big-emoji">🎉</div><h2 class="center">${t('Kart destesi bitti!')}</h2><p class="center mut">${t('{0} kelime • {1} kez tekrar gösterildi',total,again)}</p>
+  <div class="panel center"><b style="font-size:22px">+${G.xp} XP</b></div>
+  <button class="btn" onclick="start('cards')">${t('🔁 Tekrar')}</button><div class="gap"></div><button class="btn alt" data-act="home">${t('Ana sayfa')}</button>`;
+}
+
+/* ---------- sonuç ---------- */
+function reward(){
+  S.xp+=Math.max(0,G.xp);const t=today();
+  if(S.last!==t){const y=new Date(Date.now()-864e5).toLocaleDateString('en-CA');S.streak=S.last===y?S.streak+1:1;S.last=t}
+  save();
+}
+function finish(){
+  stopTimers();
+  const speedMode=G.id==='speed',total=speedMode?G.total:(G.id==='match'?G.q.length:G.q.length);
+  const ok=G.ok,pct=total?ok/total:0;
+  reward();
+  const emo=speedMode?'⚡':pct>=.9?'🏆':pct>=.7?'🎉':pct>=.4?'💪':'📚';
+  const title=speedMode?t('{0} doğru!',ok):t(pct>=.9?'Harika!':pct>=.7?'Çok iyi!':pct>=.4?'Fena değil!':'Pratik yapmaya devam!');
+  const id=G.id,miss=G.miss.slice();
+  app.innerHTML=`<div class="big-emoji">${emo}</div><h2 class="center">${title}</h2>
+  <p class="center mut">${speedMode?(ok>=S.best&&ok>0?t('🏆 Yeni rekor!'):t('Rekor: {0}',S.best)):t('{0} / {1} doğru',ok,total)}</p>
+  <div class="panel center"><b style="font-size:22px">+${Math.max(0,G.xp)} XP</b> <span class="mut">${t('• 🔥 {0} gün',S.streak)}</span></div>
+  ${miss.length?`<div class="panel"><b>${t('Tekrar etmen gerekenler')}</b><div class="gap"></div><div class="list">${miss.map(w=>`<div class="it"><div class="t"><b>${esc(w.en)}</b><span>${esc(w.tr)}</span></div><button class="mi" onclick="speak('${esc(w.en).replace(/'/g,"\\'")}')">🔊</button></div>`).join('')}</div></div>`:''}
+  <button class="btn" onclick="start('${id}')">${t('🔁 Tekrar oyna')}</button><div class="gap"></div><button class="btn alt" data-act="home">${t('Ana sayfa')}</button>`;
+}
+
+/* ---------- kelime ekranı ---------- */
+let enriching=false;
+function parseLines(text,rev){
+  const out=[];
+  for(let line of text.split(/\n/)){
+    line=line.trim();if(!line)continue;let en=line,tr='';
+    const m=line.match(/^(.+?)(?:\s+[-–—]\s+|\s*[=:;\t|]\s*)(.+)$/);
+    if(m){en=m[1];tr=m[2]}
+    else if((line.match(/,/g)||[]).length===1){const p=line.split(',');en=p[0];tr=p[1]}
+    en=en.trim();tr=tr.trim();if(rev&&tr)[en,tr]=[tr,en];
+    if(en)out.push([en,tr]);
+  }
+  return out;
+}
+function addWords(list){
+  const d=deck();let added=0;
+  for(const [en,tr,ex] of list){
+    const ex0=d.words.find(w=>norm(w.en)===norm(en));
+    if(ex0){if(!ex0.tr&&tr){ex0.tr=tr}continue}
+    d.words.push(mkWord(en,tr,ex));added++;
+  }
+  save();return added;
+}
+function wordsScreen(){
+  const d=deck(),lm=S.lang;
+  app.innerHTML=`<div class="top"><button class="back" data-act="home">←</button><h2 style="flex:1">${esc(d.name)}</h2><button class="btn sm alt" id="dm">${t('⋯ Liste')}</button></div>
+  <div class="panel"><b>${t('Kelime ekle')}</b><div class="mut" style="font-size:13px;margin:4px 0 8px">${t('Her satıra bir kelime: <b>apple - elma</b> (ya da <b>apple = elma</b>). Sadece <b>apple</b> yazarsan anlamı internetten otomatik bulunur.')}</div>
+  <textarea id="ta" rows="5" placeholder="${UI==='ka'?'apple - ვაშლი&#10;journey - მოგზაურობა&#10;borrow&#10;…':'apple - elma&#10;journey - yolculuk&#10;borrow&#10;…'}"></textarea>
+  <div class="gap"></div>
+  <div class="mut" style="font-size:13px;margin-bottom:4px">${t('Anlam dili')}</div><div class="row"><select id="lg"><option value="tr">Türkçe</option><option value="ka">ქართული</option><option value="az">Azərbaycan dili</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="es">Español</option><option value="fr">Français</option><option value="ar">العربية</option><option value="fa">فارسی</option><option value="pt">Português</option></select></div>
+  <label class="chk" style="margin-top:8px"><input type="checkbox" id="rv"> ${t('Ters yazdım (anlam - İngilizce)')}</label>
+  <div class="gap"></div>
+  <div class="row"><button class="btn alt" id="smp">${t('✨ Örnek yükle')}</button><button class="btn" id="add">${t('➕ Ekle')}</button></div>
+  <div id="st" class="mut" style="margin-top:8px;font-size:14px"></div></div>
+  <input id="sr" placeholder="${t('🔍 Ara…')}" style="margin-bottom:10px">
+  <div class="list" id="ls"></div>`;
+  $('#lg').value=lm;$('#lg').onchange=e=>{S.lang=e.target.value;save()};
+  $('#add').onclick=()=>{
+    const p=parseLines($('#ta').value,$('#rv').checked);if(!p.length)return;
+    const a=addWords(p.map(([en,tr])=>[en,tr,'']));$('#ta').value='';
+    $('#st').textContent=t('{0} yeni kelime eklendi.',a);list();enrich();
+  };
+  $('#smp').onclick=()=>{const a=addWords(SAMPLE.map(([en,tr,ka,ex])=>[en,S.lang==='ka'?ka:S.lang==='tr'?tr:'',ex]));$('#st').textContent=t('{0} örnek kelime eklendi.',a);list();enrich()};
+  $('#sr').oninput=list;
+  $('#dm').onclick=deckMenu;
+  list();
+}
+function list(){
+  const ls=$('#ls');if(!ls)return;const q=norm($('#sr')?.value),d=deck();
+  const ws=d.words.filter(w=>!q||norm(w.en).includes(q)||norm(w.tr).includes(q));
+  ls.innerHTML=ws.length?ws.slice().reverse().map(w=>`<div class="it"><div class="t"><b>${esc(w.en)}</b><span>${esc(w.tr)||''+t('<i>anlam yok – düzenle</i>')}</span></div><div class="dots">${[1,2,3,4,5].map(i=>`<i class="${(w.m||0)>=i?'on':''}"></i>`).join('')}</div><button class="mi" data-e="${w.id}">✏️</button><button class="mi" data-d="${w.id}">🗑</button></div>`).join(''):`<div class="center mut">${t('Liste boş')}</div>`;
+  ls.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{const w=d.words.find(x=>x.id===b.dataset.e);modal(t('Kelimeyi düzenle'),[{v:w.en,ph:t('İngilizce')},{v:w.tr,ph:t('Anlamı')},{v:w.ex,ph:t('Örnek cümle (isteğe bağlı)')}],v=>{if(!v[0].trim())return;w.en=v[0].trim();w.tr=v[1].trim();w.ex=v[2].trim();save();list()},t('Kaydet'))});
+  ls.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>modal(t('Bu kelime silinsin mi?'),[],()=>{d.words=d.words.filter(x=>x.id!==b.dataset.d);save();wordsScreen()},t('Sil'),true));
+}
+function deckMenu(){
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="box"><h3>${t('Liste işlemleri')}</h3>
+  <button class="btn alt" data-x="new">${t('➕ Yeni liste')}</button><button class="btn alt" data-x="ren">${t('✏️ Adını değiştir')}</button>
+  <button class="btn alt" data-x="exp">${t('📤 Kelimeleri kopyala')}</button><button class="btn alt" data-x="rst">${t('♻️ İlerlemeyi sıfırla')}</button>
+  <button class="btn red" data-x="del">${t('🗑 Listeyi sil')}</button><button class="btn alt" data-x="x">${t('Kapat')}</button></div>`;
+  document.body.appendChild(m);
+  m.onclick=e=>{
+    const x=e.target.dataset.x;if(!x)return;m.remove();const d=deck();
+    if(x==='new')modal(t('Yeni liste'),[{ph:t('Liste adı')}],v=>{if(!v[0].trim())return;const id=uid();S.decks.push({id,name:v[0].trim(),words:[]});S.cur=id;save();wordsScreen()},t('Oluştur'));
+    if(x==='ren')modal(t('Liste adı'),[{v:d.name}],v=>{if(v[0].trim()){d.name=v[0].trim();save();wordsScreen()}},t('Kaydet'));
+    if(x==='exp'){const txt=d.words.map(w=>w.en+' - '+w.tr).join('\n');(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>{$('#st').textContent=t('Kopyalandı ✔')}).catch(()=>modal(t('Kelimeler (kopyala)'),[{v:txt}],()=>{}))}
+    if(x==='rst')modal(t('Tüm ilerleme sıfırlansın mı?'),[],()=>{d.words.forEach(w=>{w.m=0;w.seen=0});save();wordsScreen()},t('Sıfırla'),true);
+    if(x==='del')modal(t('“{0}” listesi silinsin mi?',d.name),[],()=>{S.decks=S.decks.filter(z=>z.id!==d.id);if(!S.decks.length)S.decks.push({id:uid(),name:t('Kelimelerim'),words:[]});S.cur=S.decks[0].id;save();wordsScreen()},t('Sil'),true);
+  };
+}
+/* eksik anlam ve örnek cümleleri internetten tamamla (çevrimdışıysa sessizce geçer) */
+async function jf(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),7000);try{const r=await fetch(url,{signal:c.signal});return r.ok?await r.json():null}catch(e){return null}finally{clearTimeout(t)}}
+async function enrich(){
+  if(enriching)return;enriching=true;const d=deck();let n=0,fail=0;
+  for(const w of d.words){
+    if(!w.tr&&!w._f){
+      const j=await jf(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(w.en)}&langpair=en|${S.lang}`);
+      const t=j&&j.responseData&&j.responseData.translatedText;
+      if(t&&!/MYMEMORY|QUERY LENGTH/i.test(t)&&norm(t)!==norm(w.en)){w.tr=t.trim();n++}else{w._f=1;fail++}
+    }
+    if(w.ex===''&&!w._x&&!/\s/.test(w.en.trim())){
+      const j=await jf('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(w.en.trim()));
+      let ex='';try{for(const e of j)for(const m of e.meanings)for(const df of m.definitions)if(!ex&&df.example)ex=df.example}catch(e){}
+      if(ex)w.ex=ex;w._x=1;
+    }
+    save();const st=$('#st');if(st&&screen==='words'){st.textContent=n||fail?t('Anlam bulundu: {0}',n)+(fail?t(' • bulunamayan: {0} (✏️ ile elle yaz)',fail):''):st.textContent;list()}
+  }
+  enriching=false;
+}
+home();
+</script>
+</body>
+</html>
